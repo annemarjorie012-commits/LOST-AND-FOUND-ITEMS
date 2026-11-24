@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lost & Found | Student Portal</title>
+<style>
+:root{--deep:#435b43;--green:#829b70;--sage:#a9bd91;--pale:#eef2e7;--cream:#f8f8f1;--ink:#354235;--muted:#71806d;--line:#dce4d3}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:var(--cream);color:var(--ink);line-height:1.5;min-height:100vh;display:flex;flex-direction:column}
+header{background:var(--deep);color:white;padding:17px 6%;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{font-size:1.2rem;font-weight:800}.brand span{color:#d7e4c6}
+main{width:min(1000px,92%);margin:30px auto 35px;flex:1}
+.screen{display:none}.screen.active{display:block}
+.welcome,.card{background:white;border:1px solid var(--line);border-radius:18px;padding:25px;margin:18px 0;box-shadow:0 10px 26px #435b4310}
+.welcome{text-align:center;padding:45px 20px;background:linear-gradient(135deg,#e8efdd,#fff)}
+h1,h2,h3{color:var(--deep)}h1{font-size:clamp(1.8rem,5vw,2.7rem);margin:0}h2{margin-top:0}
+p{color:var(--muted)}
+button{border:0;border-radius:9px;padding:12px 17px;background:var(--green);color:white;font-weight:bold;cursor:pointer;font-size:.95rem}
+button:hover{filter:brightness(.94)}button.secondary{background:#e8eddf;color:var(--deep)}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.center{justify-content:center}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px;margin-top:18px}
+.choice{text-align:left;background:white;color:var(--deep);border:1px solid var(--line);padding:22px;border-radius:14px}
+.choice strong,.choice span{display:block}.choice span{font-weight:normal;color:var(--muted);margin-top:5px}
+form{display:grid;gap:13px}
+label{display:grid;gap:6px;color:var(--deep);font-weight:bold}
+input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:8px;font:inherit}
+textarea{min-height:90px}
+.notice{padding:13px;background:var(--pale);border-left:4px solid var(--green);border-radius:7px;color:var(--deep)}
+.topline{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.item{border:1px solid var(--line);border-radius:12px;padding:15px;background:white}
+.item h3{margin:7px 0}.item p{margin:5px 0}
+.status{display:inline-block;background:var(--pale);color:var(--deep);border-radius:20px;padding:3px 9px;font-size:.8rem;font-weight:bold}
+.empty{padding:22px;text-align:center;border:1px dashed var(--sage);border-radius:10px;color:var(--muted)}
+footer{background:#006b45;color:white;text-align:center;padding:24px 16px;margin-top:auto}
+footer .school{font-size:1.12rem;font-weight:bold;margin-bottom:5px}
+footer .portal{font-size:1.05rem;margin-bottom:8px}
+footer p{color:#fff;margin:5px 0}
+@media(max-width:600px){.card{padding:18px}.welcome{padding:32px 17px}}
+</style>
+</head>
+<body>
+<header><div class="brand">LOST <span>&</span> FOUND</div><div>Student Lost Item Assistance Portal</div></header>
+<main>
+<section id="home" class="screen active"><div class="welcome"><h1>Lost something? Found something?</h1><p>Report lost belongings and help return items to their owners.</p><div class="actions center"><button onclick="go('login')">Log In</button><button class="secondary" onclick="go('register')">Create Account</button></div></div></section>
+
+<section id="login" class="screen"><div class="card"><h2>Log In</h2><form onsubmit="event.preventDefault();loginUser()"><label>Email Address<input id="loginEmail" type="email" placeholder="Enter your registered email" autocomplete="email" required></label><label>Password<input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password" required></label><button type="submit">Log In</button></form><p id="loginMessage" role="alert"></p><button class="secondary" onclick="go('home')">Back</button><p>Don't have an account? <a href="#" onclick="go('register');return false">Register here</a>.</p></div></section>
+
+<section id="register" class="screen"><div class="card"><h2>Create Account</h2><form onsubmit="event.preventDefault();registerUser()"><label>Full Name<input id="regName" type="text" required autocomplete="name"></label><label>Email Address<input id="regEmail" type="email" placeholder="example@email.com" required autocomplete="email"></label><label>Password<input id="regPassword" type="password" minlength="6" placeholder="At least 6 characters" required autocomplete="new-password"></label><label>Confirm Password<input id="regConfirmPassword" type="password" minlength="6" required autocomplete="new-password"></label><button type="submit">Register</button></form><p id="registerMessage" role="alert"></p><button class="secondary" onclick="go('login')">Back to Log In</button></div></section>
+
+<section id="dashboard" class="screen"><div class="topline"><div><h1>User Dashboard</h1><p>Welcome, <span id="welcomeName">Student</span>! Choose what you want to do.</p></div><button class="secondary" onclick="logoutUser()">Log Out</button></div><div class="grid"><button class="choice" onclick="go('reportChoice')"><strong>＋ Report an Item</strong><span>Submit a lost or found item report.</span></button><button class="choice" onclick="go('browse')"><strong>⌕ Browse / Search Items</strong><span>Search and filter verified reports.</span></button></div></section>
+
+<section id="reportChoice" class="screen"><div class="card"><h2>Choose Report Type</h2><div class="grid"><button class="choice" onclick="openReport('Lost')"><strong>Lost Item</strong><span>I lost something.</span></button><button class="choice" onclick="openReport('Found')"><strong>Found Item</strong><span>I found something.</span></button></div><button class="secondary" onclick="go('dashboard')">Back</button></div></section>
+
+<section id="reportForm" class="screen"><div class="card"><h2 id="reportTitle">Report Item</h2><form id="reportFormEl" onsubmit="event.preventDefault();submitReport()"><label>Item name<input id="itemName" required></label><label>Category<select id="category" required><option value="">Choose category</option><option>School supplies</option><option>Electronics</option><option>Clothing / Accessories</option><option>Wallet / ID</option><option>Others</option></select></label><label>Description<textarea id="description" required></textarea></label><label>Where was it lost or found?<input id="place" required></label><label>Date<input id="date" type="date" required></label><label>Contact information<input id="contact" type="email" placeholder="Enter your email address" required></label><div class="actions"><button type="submit">Submit Report</button><button type="button" class="secondary" onclick="go('reportChoice')">Cancel</button></div></form></div></section>
+
+<section id="pending" class="screen"><div class="card"><h2>Report Submitted</h2><p class="notice">Your report has been sent to the admin for verification. It will appear in the item list after approval.</p><button onclick="go('dashboard')">Return to Dashboard</button></div></section>
+
+<section id="browse" class="screen"><div class="topline"><div><h1>Browse / Search Items</h1><p>View verified lost and found reports.</p></div><button class="secondary" onclick="go('dashboard')">Dashboard</button></div><div class="card"><div class="grid"><label>Search<input id="search" oninput="renderItems()" placeholder="Search item"></label><label>Type<select id="filterType" onchange="renderItems()"><option>All</option><option>Lost</option><option>Found</option></select></label><label>Category<select id="filterCategory" onchange="renderItems()"><option>All</option><option>School supplies</option><option>Electronics</option><option>Clothing / Accessories</option><option>Wallet / ID</option><option>Others</option></select></label></div><div id="items" class="grid"></div></div></section>
+
+<section id="match" class="screen"><div class="card"><h2>Possible Item Match</h2><p id="matchText"></p><p class="notice">If this is your item, submit a claim and proof of ownership. Otherwise, return to the list and wait for updates.</p><div class="actions"><button onclick="go('claim')">Yes — Claim / Contact</button><button class="secondary" onclick="go('browse')">No — Wait for Updates</button></div></div></section>
+
+<section id="claim" class="screen"><div class="card"><h2>Submit Claim + Proof of Ownership</h2><form onsubmit="event.preventDefault();submitClaim()"><label>Item being claimed<input id="claimItem" required></label><label>Your name<input id="claimName" required></label><label>Proof of ownership<textarea id="proof" required></textarea></label><label>Contact information<input id="claimContact" type="email" required></label><button type="submit">Submit Claim</button></form></div></section>
+<section id="claimPending" class="screen"><div class="card"><h2>Claim Submitted</h2><p class="notice">Your claim and proof of ownership have been sent to the admin for review.</p><button onclick="go('dashboard')">Return to Dashboard</button></div></section>
+</main>
+
+<footer>
+  <div class="school">Minuyan National High School</div>
+  <div class="portal">Lost & Found Student Portal</div>
+  <p>Designed to help students report, search, and recover their lost belongings.</p>
+  <p>© 2026 Lost & Found. All Rights Reserved.</p>
+</footer>
+
+<script>
+const DB='lostFoundSharedData_v1';
+const USERS='lostFoundAccounts_v1';
+let typeNow='Lost',selected=null,currentUser=null;
+
+function loadDB(){try{return JSON.parse(localStorage.getItem(DB))||{reports:[],claims:[],activities:[]}}catch(e){return{reports:[],claims:[],activities:[]}}}
+function saveDB(data){localStorage.setItem(DB,JSON.stringify(data))}
+function loadUsers(){try{return JSON.parse(localStorage.getItem(USERS))||[]}catch(e){return[]}}
+function saveUsers(users){localStorage.setItem(USERS,JSON.stringify(users))}
+function logActivity(message,type){const d=loadDB();d.activities.unshift({id:Date.now()+Math.random(),message,type,time:new Date().toISOString()});d.activities=d.activities.slice(0,500);saveDB(d)}
+
+function go(id){
+  document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='browse')renderItems();
+}
+function registerUser(){
+  const name=document.getElementById('regName').value.trim();
+  const email=document.getElementById('regEmail').value.trim().toLowerCase();
+  const password=document.getElementById('regPassword').value;
+  const confirm=document.getElementById('regConfirmPassword').value;
+  const message=document.getElementById('registerMessage');
+  if(!emailInputValid(email)){message.textContent='Please enter a valid email address.';return}
+  if(password.length<6){message.textContent='Password must be at least 6 characters.';return}
+  if(password!==confirm){message.textContent='Passwords do not match.';return}
+  const users=loadUsers();
+  if(users.some(u=>u.email===email)){message.textContent='This email is already registered. Please log in instead.';return}
+  users.push({name,email,password});
+  saveUsers(users);
+  logActivity('New account registered: '+email,'Registration');
+  document.getElementById('register').querySelector('form').reset();
+  document.getElementById('loginMessage').textContent='Account created. Please log in using your registered email and password.';
+  go('login');
+}
+function loginUser(){
+  const email=document.getElementById('loginEmail').value.trim().toLowerCase();
+  const password=document.getElementById('loginPassword').value;
+  const user=loadUsers().find(u=>u.email===email&&u.password===password);
+  const message=document.getElementById('loginMessage');
+  if(!emailInputValid(email)){message.textContent='Please enter a valid email address.';return}
+  if(!user){message.textContent='Email or password is incorrect, or the account is not registered.';return}
+  currentUser=user;
+  document.getElementById('welcomeName').textContent=user.name;
+  document.getElementById('login').querySelector('form').reset();
+  message.textContent='';
+  logActivity('User logged in: '+email,'Login');
+  go('dashboard');
+}
+function logoutUser(){if(currentUser)logActivity('User logged out: '+currentUser.email,'Logout');currentUser=null;go('home')}
+function emailInputValid(email){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)}
+
+function openReport(t){typeNow=t;document.getElementById('reportTitle').textContent=t+' Item Report';go('reportForm')}
+function submitReport(){
+  if(!currentUser){go('login');return}
+  const d=loadDB();
+  const r={id:Date.now(),type:typeNow,name:document.getElementById('itemName').value.trim(),category:document.getElementById('category').value,description:document.getElementById('description').value.trim(),place:document.getElementById('place').value.trim(),date:document.getElementById('date').value,contact:document.getElementById('contact').value.trim(),status:'Pending admin verification',createdAt:new Date().toISOString(),submittedBy:currentUser.email};
+  d.reports.unshift(r);
+  d.activities.unshift({id:Date.now()+1,message:typeNow+' item report submitted: '+r.name,type:'Report',time:new Date().toISOString()});
+  saveDB(d);
+  document.getElementById('reportFormEl').reset();
+  go('pending');
+}
+function renderItems(){
+  const d=loadDB(),q=document.getElementById('search').value.toLowerCase(),t=document.getElementById('filterType').value,c=document.getElementById('filterCategory').value;
+  const a=d.reports.filter(r=>r.status==='Posted'&&(t==='All'||r.type===t)&&(c==='All'||r.category===c)&&(r.name+' '+r.description+' '+r.place).toLowerCase().includes(q));
+  document.getElementById('items').innerHTML=a.length?a.map(r=>`<article class="item"><span class="status">${safe(r.type)} · Verified</span><h3>${safe(r.name)}</h3><p>${safe(r.category)} — ${safe(r.description)}</p><p>${safe(r.place)} · ${safe(r.date)}</p><button onclick="choose(${r.id})">This may be my item</button></article>`).join(''):'<div class="empty">No matching posted items. Try another search.</div>';
+}
+function choose(id){
+  const d=loadDB();selected=d.reports.find(r=>r.id===id);if(!selected)return;
+  document.getElementById('matchText').textContent=selected.type+' item: '+selected.name+' — '+selected.description;
+  document.getElementById('claimItem').value=selected.name;
+  go('match');logActivity('Student viewed a possible match for: '+selected.name,'Match');
+}
+function submitClaim(){
+  if(!currentUser){go('login');return}
+  const d=loadDB(),c={id:Date.now(),item:document.getElementById('claimItem').value.trim(),name:document.getElementById('claimName').value.trim(),proof:document.getElementById('proof').value.trim(),contact:document.getElementById('claimContact').value.trim(),status:'Pending admin review',createdAt:new Date().toISOString(),submittedBy:currentUser.email};
+  d.claims.unshift(c);
+  d.activities.unshift({id:Date.now()+1,message:'Claim submitted for '+c.item+' by '+c.name,type:'Claim',time:new Date().toISOString()});
+  saveDB(d);go('claimPending');
+}
+function safe(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+</script>
+</body>
+</html>
